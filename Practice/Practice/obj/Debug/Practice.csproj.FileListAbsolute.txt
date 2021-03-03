@@ -1,0 +1,14 @@
+D:\Test\Practice\Practice\bin\Debug\Practice.exe.config
+D:\Test\Practice\Practice\bin\Debug\Practice.exe
+D:\Test\Practice\Practice\bin\Debug\Practice.pdb
+D:\Test\Practice\Practice\obj\Debug\Practice.csprojAssemblyReference.cache
+D:\Test\Practice\Practice\obj\Debug\Practice.csproj.CoreCompileInputs.cache
+D:\Test\Practice\Practice\obj\Debug\Practice.exe
+D:\Test\Practice\Practice\obj\Debug\Practice.pdb
+E:\AB\Practice-2-Year-master\Practice\Practice\bin\Debug\Practice.exe.config
+E:\AB\Practice-2-Year-master\Practice\Practice\bin\Debug\Practice.exe
+E:\AB\Practice-2-Year-master\Practice\Practice\bin\Debug\Practice.pdb
+E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.csprojAssemblyReference.cache
+E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.csproj.CoreCompileInputs.cache
+E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.exe
+E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.pdb
