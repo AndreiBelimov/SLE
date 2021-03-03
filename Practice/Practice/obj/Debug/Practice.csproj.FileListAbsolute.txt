@@ -12,3 +12,10 @@ E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.csprojAssembly
 E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.csproj.CoreCompileInputs.cache
 E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.exe
 E:\AB\Practice-2-Year-master\Practice\Practice\obj\Debug\Practice.pdb
+C:\Prog\Practice2\Practice\Practice\Practice\bin\Debug\Practice.exe.config
+C:\Prog\Practice2\Practice\Practice\Practice\bin\Debug\Practice.exe
+C:\Prog\Practice2\Practice\Practice\Practice\bin\Debug\Practice.pdb
+C:\Prog\Practice2\Practice\Practice\Practice\obj\Debug\Practice.csprojAssemblyReference.cache
+C:\Prog\Practice2\Practice\Practice\Practice\obj\Debug\Practice.csproj.CoreCompileInputs.cache
+C:\Prog\Practice2\Practice\Practice\Practice\obj\Debug\Practice.exe
+C:\Prog\Practice2\Practice\Practice\Practice\obj\Debug\Practice.pdb

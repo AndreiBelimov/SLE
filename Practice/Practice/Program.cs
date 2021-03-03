@@ -14,25 +14,14 @@ namespace Practice
     {
         static void Input()
         {
-            Console.WriteLine("Введите количество неизвестных");
-            int n = int.Parse(Console.ReadLine());
+            var matrix = new double[,]{{5, 3, 0, 0 },
+                                       {3, 6, 1, 0 },
+                                       {0, 1, 4, -2 },
+                                       {0, 0, 1, -3 } };
 
-            Console.WriteLine("Введите коэффиценты матрицы системы");
-            double[,] matrix = new double[n, n];
-            for (int i = 0; i < n; i++)
-            {
-                string[] str = Console.ReadLine().Split();
-                for (int j = 0; j < n; j++)
-                    matrix[i, j] = Convert.ToDouble(str[j]);
-            }
+            var values = new double[] { 8, 10, 3, -2 };
 
-            Console.WriteLine("Введите вектор свободных коэффицентов");
-            double[] value = new double[n];
-            string[] temp = Console.ReadLine().Split();
-            for (int i = 0; i < n; i++)
-                value[i] = double.Parse(temp[i]);
-
-            SLE system = new SLE(new Matrix(matrix), new Vector(value));
+            SLE system = new SLE(new Matrix(matrix), new Vector(values));
             Console.WriteLine();
 
             Console.WriteLine("Метод прогонки");
@@ -43,8 +32,5 @@ namespace Practice
         {
             Input();
         }
-    }
-
-
-    
+    } 
 }

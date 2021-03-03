@@ -10,21 +10,23 @@ using System.Web;
 namespace Practice.Class
 {
     /// <summary>
-    /// Класс СЛАУ
+    /// СЛАУ
     /// </summary>
     public class SLE
     {
-        private Matrix data;        //Матрица коэффициентов системы
-        private Vector values;       //Вектор свободных членов
+        private readonly Matrix data;        //Матрица коэффициентов системы
+        private readonly Vector values;       //Вектор свободных членов
+        public Matrix Data => data.Copy();
+        public Vector Values => values.Copy();
 
         public SLE(Matrix data, Vector values)
         {
-            this.data = data;
-            this.values = values;
+            this.data = data.Copy();
+            this.values = values.Copy();
         }
 
         /// <summary>
-        /// Вывод системы
+        /// Вывод системы на консоль
         /// </summary>
         public void PrintSystem()
         {
@@ -81,7 +83,7 @@ namespace Practice.Class
 
             for (int i = 0; i < gaussMatrix.Columns - 1; i++)
             {
-                Matrix.SortRows(gaussMatrix, gaussVector, i);
+                gaussMatrix.SortRows(gaussVector, i);
                 for (int j = i + 1; j < gaussMatrix.Columns; j++)
                 {
                     if (gaussMatrix[i, i] != 0)
@@ -123,47 +125,38 @@ namespace Practice.Class
             if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
             if (!data.IsTridiagonal) { Console.WriteLine("Матрица не трехдиагональная" + '\n'); return; }
 
-            var A = new double[data.Rows];  // нижняя диагональ
-            var B = new double[data.Rows]; // средняя диагональ
-            var C = new double[data.Rows]; // верхняя диагональ
+            var a = new double[data.Rows - 1];  // нижняя диагональ
+            var b = new double[data.Rows]; // средняя диагональ
+            var c = new double[data.Rows - 1]; // верхняя диагональ
             var y = new double[data.Rows]; // вектор значений
 
-            A[0] = 0;
-            A[data.Rows - 1] = data[data.Rows - 1, data.Rows - 1];
-
-            B[0] = data[0, 0];
-            B[data.Rows - 1] = data[data.Rows - 1, data.Rows - 1];
-
-            C[0] = data[0, 1];
-            C[data.Rows - 1] = 0;
-
-            y[0] = values[0];
+            b[data.Rows - 1] = data[data.Rows - 1, data.Rows - 1];
             y[data.Rows - 1] = values[data.Rows - 1];
 
-            for (int i = 1; i < data.Rows - 1; i++)
+            for (int i = 0; i < data.Rows - 1; i++)
             {
-                A[i] = data[i, i - 1];
-                B[i] = data[i, i];
-                C[i] = data[i, i + 1];
+                a[i] = data[i + 1, i];
+                b[i] = data[i, i];
+                c[i] = data[i, i + 1];
                 y[i] = values[i];
             }
-                
+            
             var alpha = new double[data.Rows];
             var beta = new double[data.Rows];
 
-            alpha[0] = C[0] / B[0];
-            beta[0] = y[0] / B[0];
+            alpha[0] = c[0] / b[0];
+            beta[0] = y[0] / b[0];
 
             for (int i = 1; i < data.Rows - 1; i++)
             {
-                alpha[i] = C[i] / (B[i] - A[i - 1] * alpha[i - 1]);
-                beta[i] = (y[i] - A[i - 1] * beta[i - 1]) / (B[i] - A[i - 1] * alpha[i - 1]);
+                alpha[i] = c[i] / (b[i] - a[i - 1] * alpha[i - 1]);
+                beta[i] = (y[i] - a[i - 1] * beta[i - 1]) / (b[i] - a[i - 1] * alpha[i - 1]);
             }
             
             Vector x = new Vector(data.Rows);
             x[data.Rows - 1] = beta[data.Rows - 1];
-            for (int i = data.Rows - 2; i >= 0; i--)
-                x[i] = beta[i] - alpha[i] * x[i + 1];
+            for (int i = data.Rows - 1; i > 0; i--)
+                x[i - 1] = beta[i - 1] - alpha[i - 1] * x[i];
 
             x.Print();
         }
@@ -206,8 +199,8 @@ namespace Practice.Class
                 }
             }
 
-            Matrix uT = u.CreateTransposeMatrix();
-            double temp = 0;
+            Matrix uT = u.GetTransposedMatrix();
+            double temp;
 
             for (int i = 0; i < data.Rows; i++)
             {
@@ -257,7 +250,7 @@ namespace Practice.Class
                 alpha[i, i] = 0;
             }
 
-            if (alpha.NormColum >= 1 || alpha.NormRow >= 1)
+            if (alpha.ColumnNorm >= 1 || alpha.RowNorm >= 1)
                 { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
 
             Vector beta = x0.Copy();
@@ -305,7 +298,7 @@ namespace Practice.Class
                 alpha[i, i] = 0;
             }
 
-            if (alpha.NormColum >= 1 || alpha.NormRow >= 1)
+            if (alpha.ColumnNorm >= 1 || alpha.RowNorm >= 1)
                 { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
 
             for (int i = 0; i < initMatrix.Rows; i++)
@@ -319,8 +312,8 @@ namespace Practice.Class
                 }
             }
 
-            if (((E - L).CreateInvertibleMatrix() * U).NormColum >= 1 ||
-                    ((E - L).CreateInvertibleMatrix() * U).NormRow >= 1)
+            if (((E - L).CreateInvertibleMatrix() * U).ColumnNorm >= 1 ||
+                    ((E - L).CreateInvertibleMatrix() * U).RowNorm >= 1)
                         { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
 
             Vector beta = x0.Copy();

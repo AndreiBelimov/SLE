@@ -7,40 +7,32 @@ using System.Threading.Tasks;
 namespace Practice.Class
 {
     /// <summary>
-    /// Клласс матрицы
+    /// Матрица значений double
     /// </summary>
     public class Matrix
     {
-        private readonly double[,] data;                                     //Значения матрицы 
-        private double precalculatedDeterminant = double.NaN;       //Определитель
-        private readonly int rows;                                           //Кол-во строк
-        private readonly int columns;                                        //Кол-во столбцов
-        public int Rows => rows;
-        public int Columns => columns;
-        public double[,] Data => data;
-
+        private readonly double[,] data;
         
+        public int Rows => data.GetLength(0);
+        public int Columns => data.GetLength(1);
+        public double[,] Data => data;
+        public double Determinant => CalculateDeterminant();
         public bool IsSquare  => Rows == Columns;
         public bool IsTridiagonal => CheckTridiagonalMatrix();
         public bool IsSymmetrical => CheckSymmetryMatrix();
-        public double NormColum => CalculateNormColum();
-        public double NormRow => CalculateNormRow();
+        public double ColumnNorm => CalculateNormColum();
+        public double RowNorm => CalculateNormRow();
 
         public Matrix(int rows, int columns)
         {
-            this.rows = rows;
-            this.columns = columns;
             data = new double[rows, columns];
-            ProcessFunctionOverData((i, j) => data[i, j] = 0);
         }
 
         public Matrix(double[,] initArray)
         {
-            rows = initArray.GetLength(0);
-            columns = initArray.GetLength(1);
-            data = new double[rows, columns];
-            for (int i = 0; i < rows; i++)
-                for (int j = 0; j < columns; j++)
+            data = new double[initArray.GetLength(0), initArray.GetLength(1)];
+            for (int i = 0; i < initArray.GetLength(0); i++)
+                for (int j = 0; j < initArray.GetLength(1); j++)
                     data[i, j] = initArray[i, j];
         }
 
@@ -56,10 +48,10 @@ namespace Practice.Class
        
 
         /// <summary>
-        /// Функция обработки данных
+        /// Проходит циклом по всем элементам
         /// </summary>
-        /// <param name="func">Операция для изменения элементов</param>
-        public void ProcessFunctionOverData(Action<int, int> func)
+        /// <param name="func">Функция для изменения элементов</param>
+        public void GoThroughElements(Action<int, int> func)
         {
             for (var i = 0; i < Rows; i++)
                 for (var j = 0; j < Columns; j++)
@@ -67,113 +59,9 @@ namespace Practice.Class
         }
 
         /// <summary>
-        /// Обращение к элементу матрицы
+        /// Создает единичную матрицу
         /// </summary>
-        /// <param name="x">Строка</param>
-        /// <param name="y">Столбец</param>
-        /// <returns></returns>
-        public double this[int x, int y]
-        {
-            get
-            {
-                return data[x, y];
-            }
-            set
-            {
-                data[x, y] = value;
-                precalculatedDeterminant = double.NaN;
-            }
-        }
-
-
-        /// <summary>
-        /// Сложение двух матриц
-        /// </summary>
-        /// <param name="matrixOne">Первая матрица</param>
-        /// <param name="matrixTwo">Вторая матрица</param>
-        /// <returns></returns>
-        public static Matrix operator +(Matrix matrixOne, Matrix matrixTwo)
-        {
-            if (matrixOne.Rows != matrixTwo.Rows || matrixOne.Columns != matrixTwo.Columns)
-                throw new ArgumentException("Эти матрицы не могут быть сложены");
-
-            var result = new Matrix(matrixOne.Rows, matrixOne.Columns);
-            result.ProcessFunctionOverData((i, j) => result[i, j] = matrixOne[i, j] + matrixTwo[i, j]);
-            return result;
-        }
-
-        /// <summary>
-        /// Вычитание двух матриц
-        /// </summary>
-        /// <param name="matrix1">Первая матрица</param>
-        /// <param name="matrix2">Вторая матрица</param>
-        /// <returns></returns>
-        public static Matrix operator -(Matrix matrix1, Matrix matrix2)
-        {
-            return matrix1 + (matrix2 * -1);
-        }
-
-        /// <summary>
-        /// Операция умножения матрицы на число
-        /// </summary>
-        /// <param name="matrix">Матрица</param>
-        /// <param name="number">Число</param>
-        /// <returns></returns>
-        public static Matrix operator *(Matrix matrix, double number)
-        {
-            var result = new Matrix(matrix.Rows, matrix.Columns);
-            result.ProcessFunctionOverData((i, j) => result[i, j] = matrix[i, j] * number);
-            return result;
-        }
-
-        /// <summary>
-        /// Операция умножения матрицы на вектор
-        /// </summary>
-        /// <param name="matrix">Матрица</param>
-        /// <param name="vector">Вектор</param>
-        /// <returns></returns>
-        public static Vector operator *(Matrix matrix, Vector vector)
-        {
-            if (matrix.Columns != vector.Count)
-                throw new ArgumentException("Эти матрицы не могут быть умножены");
-
-            var result = new Matrix(matrix.Rows, 1);
-            result.ProcessFunctionOverData((i, j) =>
-            {
-                for (var k = 0; k < matrix.Columns; k++)
-                {
-                    result[i, j] += matrix[i, k] * vector[k];
-                }
-            });
-            return new Vector(result);
-        }
-
-        /// <summary>
-        /// Операция умножения двух матриц
-        /// </summary>
-        /// <param name="matrixOne">Первая матрица</param>
-        /// <param name="matrixTwo">Вторая матрица</param>
-        /// <returns></returns>
-        public static Matrix operator *(Matrix matrixOne, Matrix matrixTwo)
-        {
-            if (matrixOne.Columns != matrixTwo.Rows)
-                throw new ArgumentException("Эти матрицы не могут быть умножены");
-
-            var result = new Matrix(matrixOne.Rows, matrixTwo.Columns);
-            result.ProcessFunctionOverData((i, j) =>
-            {
-                for (var k = 0; k < matrixOne.Columns; k++)
-                {
-                    result[i, j] += matrixOne[i, k] * matrixTwo[k, j];
-                }
-            });
-            return result;
-        }
-
-        /// <summary>
-        /// Создание единичной матрицы 
-        /// </summary>
-        /// <param name="size">Размер матрицы</param>
+        /// <param name="size">Размерность матрицы</param>
         /// <returns></returns>
         public static Matrix CreateIdentityMatrix(int size)
         {
@@ -185,25 +73,22 @@ namespace Practice.Class
         }
 
         /// <summary>
-        /// Транспонирование матрицы
+        /// Возвращает транспонированную матрицу
         /// </summary>
         /// <returns></returns>
-        public Matrix CreateTransposeMatrix()
+        public Matrix GetTransposedMatrix()
         {
             var result = new Matrix(Columns, Rows);
-            result.ProcessFunctionOverData((i, j) => result[i, j] = this[j, i]);
+            result.GoThroughElements((i, j) => result[i, j] = this[j, i]);
             return result;
         }
 
         /// <summary>
-        /// Определитель
+        /// Возвращает определитель
         /// </summary>
         /// <returns></returns>
         public double CalculateDeterminant()
         {
-            if (!double.IsNaN(precalculatedDeterminant))
-                return precalculatedDeterminant;
-
             if (!IsSquare)
                 throw new InvalidOperationException("Определитель существует только у квадратных матриц");
 
@@ -217,12 +102,11 @@ namespace Practice.Class
                 result += (j % 2 == 1 ? 1 : -1) * this[1, j] *
                     CreateMatrixWithoutColumn(j).CreateMatrixWithoutRow(1).CalculateDeterminant();
 
-            precalculatedDeterminant = result;
             return result;
         }
 
         /// <summary>
-        /// Обратная матрица
+        /// Возвращает обратную матрицу
         /// </summary>
         /// <returns></returns>
         public Matrix CreateInvertibleMatrix()
@@ -234,19 +118,19 @@ namespace Practice.Class
                 return null;
 
             Matrix result = new Matrix(Rows, Rows);
-            ProcessFunctionOverData((i, j) =>
+            GoThroughElements((i, j) =>
             {
                 result[i, j] = ((i + j) % 2 == 1 ? -1 : 1) * CalculateMinor(i, j) / determinant;
             });
 
-            return result.CreateTransposeMatrix();
+            return result.GetTransposedMatrix();
         }
-        
+
         /// <summary>
-        /// Подсчет минора
+        /// Возвращает минор
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="j"></param>
+        /// <param name="i">Номер строки</param>
+        /// <param name="j">Номер столбца</param>
         /// <returns></returns>
         private double CalculateMinor(int i, int j)
         {
@@ -254,51 +138,51 @@ namespace Practice.Class
         }
 
         /// <summary>
-        /// Создать матрицу без строки
+        /// Возвращает матрицу без строки
         /// </summary>
-        /// <param name="row">Cтрока</param>
+        /// <param name="row">Номер строки</param>
         /// <returns></returns>
         private Matrix CreateMatrixWithoutRow(int row)
         {
             if (row < 0 || row >= Rows)
-                throw new ArgumentException("Строка не существует");
+                throw new ArgumentException("Строки с данным номером не существует");
 
             var result = new Matrix(Rows - 1, Columns);
-            result.ProcessFunctionOverData((i, j) => result[i, j] = i < row ? this[i, j] : this[i + 1, j]);
+            result.GoThroughElements((i, j) => result[i, j] = i < row ? this[i, j] : this[i + 1, j]);
             return result;
         }
 
         /// <summary>
-        /// Создать матрицу без столбца
-        /// </summary>
-        /// <param name="row">Cтолбец</param>
+        /// Возвращает матрицу без столбца
+        /// </summary> 
+        /// <param name="column">Номер столбца</param>
         /// <returns></returns>
         private Matrix CreateMatrixWithoutColumn(int column)
         {
             if (column < 0 || column >= Columns)
                 throw new ArgumentException("Столбец не существует");
             var result = new Matrix(Rows, Columns - 1);
-            result.ProcessFunctionOverData((i, j) => result[i, j] = j < column ? this[i, j] : this[i, j + 1]);
+            result.GoThroughElements((i, j) => result[i, j] = j < column ? this[i, j] : this[i, j + 1]);
             return result;
         }
 
         /// <summary>
-        /// Вывод матрицы
+        /// Выводит матрицу на консоль
         /// </summary>
         public void Print()
         {
-            for (int i = 0; i < rows; i++)
+            for (int i = 0; i < Rows; i++)
             {
-                for (int j = 0; j < columns; j++)
+                for (int j = 0; j < Columns; j++)
                     Console.Write("{0} ", data[i, j]);
                 Console.WriteLine();
             }
         }
 
         /// <summary>
-        /// Метод позволяющий заменить нужный столбец
+        /// Заменяет выбранный столбец матрицы
         /// </summary>
-        /// <param name="vector">Вектор столбца</param>
+        /// <param name="vector">Вектор для замены</param>
         /// <param name="index">Номер столбца</param>
         /// <returns></returns>
         public Matrix InsertColumn(Vector vector, int index)
@@ -307,13 +191,13 @@ namespace Practice.Class
                 throw new ArgumentException("Расхождение с размерами");
 
             Matrix rez = new Matrix(data);
-            for (int i = 0; i < rez.rows; i++)
+            for (int i = 0; i < rez.Rows; i++)
                 rez[i, index] = vector[i];
             return rez;
         }
 
         /// <summary>
-        /// Копирование матрицы
+        /// Возвращяет копию матрицы
         /// </summary>
         /// <returns></returns>
         public Matrix Copy()
@@ -433,20 +317,19 @@ namespace Practice.Class
         }
 
         /// <summary>
-        /// Сортировка строк
+        /// Сортирует строки матрицы(?)
         /// </summary>
-        /// <param name="matrix">Сортируемая матрица</param>
         /// <param name="value">Вектор</param>
         /// <param name="index">Индекс</param>
-        public static void SortRows(Matrix matrix, Vector value, int index)
+        public void SortRows(Vector value, int index)
         {
-            double maxElement = matrix[index, index];
+            double maxElement = data[index, index];
             int maxElementIndex = index;
-            for (int i = index + 1; i < matrix.Columns; i++)
+            for (int i = index + 1; i < Columns; i++)
             {
-                if (matrix[i, index] > maxElement)
+                if (data[i, index] > maxElement)
                 {
-                    maxElement = matrix[i, index];
+                    maxElement = data[i, index];
                     maxElementIndex = i;
                 }
             }
@@ -459,13 +342,80 @@ namespace Practice.Class
                 value[maxElementIndex] = value[index];
                 value[index] = temp;
 
-                for (int i = 0; i < matrix.Rows; i++)
+                for (int i = 0; i < Rows; i++)
                 {
-                    temp = matrix[maxElementIndex, i];
-                    matrix[maxElementIndex, i] = matrix[index, i];
-                    matrix[index, i] = temp;
+                    temp = data[maxElementIndex, i];
+                    data[maxElementIndex, i] = data[index, i];
+                    data[index, i] = temp;
                 }
             }
         }
+
+        public double this[int x, int y]
+        {
+            get
+            {
+                return data[x, y];
+            }
+            set
+            {
+                data[x, y] = value;
+            }
+        }
+
+        public static Matrix operator +(Matrix matrixOne, Matrix matrixTwo)
+        {
+            if (matrixOne.Rows != matrixTwo.Rows || matrixOne.Columns != matrixTwo.Columns)
+                throw new ArgumentException("Эти матрицы не могут быть сложены");
+
+            var result = new Matrix(matrixOne.Rows, matrixOne.Columns);
+            result.GoThroughElements((i, j) => result[i, j] = matrixOne[i, j] + matrixTwo[i, j]);
+            return result;
+        }
+
+        public static Matrix operator -(Matrix matrix1, Matrix matrix2)
+        {
+            return matrix1 + (matrix2 * -1);
+        }
+
+        public static Matrix operator *(Matrix matrix, double number)
+        {
+            var result = new Matrix(matrix.Rows, matrix.Columns);
+            result.GoThroughElements((i, j) => result[i, j] = matrix[i, j] * number);
+            return result;
+        }
+
+        public static Vector operator *(Matrix matrix, Vector vector)
+        {
+            if (matrix.Columns != vector.Count)
+                throw new ArgumentException("Эти матрицы не могут быть умножены");
+
+            var result = new Matrix(matrix.Rows, 1);
+            result.GoThroughElements((i, j) =>
+            {
+                for (var k = 0; k < matrix.Columns; k++)
+                {
+                    result[i, j] += matrix[i, k] * vector[k];
+                }
+            });
+            return new Vector(result);
+        }
+
+        public static Matrix operator *(Matrix matrixOne, Matrix matrixTwo)
+        {
+            if (matrixOne.Columns != matrixTwo.Rows)
+                throw new ArgumentException("Эти матрицы не могут быть умножены");
+
+            var result = new Matrix(matrixOne.Rows, matrixTwo.Columns);
+            result.GoThroughElements((i, j) =>
+            {
+                for (var k = 0; k < matrixOne.Columns; k++)
+                {
+                    result[i, j] += matrixOne[i, k] * matrixTwo[k, j];
+                }
+            });
+            return result;
+        }
+
     }
 }
