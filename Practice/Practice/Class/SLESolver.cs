@@ -1,82 +1,58 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Practice.Class
 {
     /// <summary>
-    /// СЛАУ
+    /// Предоставляет методы решения СЛАУ
     /// </summary>
-    public class SLE
+    static class SLESolver
     {
-        private readonly Matrix data;        //Матрица коэффициентов системы
-        private readonly Vector values;       //Вектор свободных членов
-        public Matrix Data => data.Copy();
-        public Vector Values => values.Copy();
-
-        public SLE(Matrix data, Vector values)
-        {
-            this.data = data.Copy();
-            this.values = values.Copy();
-        }
-
-        /// <summary>
-        /// Вывод системы на консоль
-        /// </summary>
-        public void PrintSystem()
-        {
-            for (int i = 0; i < data.Rows; i++)
-            {
-                for (int j = 0; j < data.Columns; j++)
-                {
-                    Console.Write("{0, 3}x{1} ", j == 0 ? data[i, j] : Math.Abs(data[i, j]), (j + 1));
-                    if (j != data.Columns - 1)
-                        Console.Write("{0, 3} ", data[i, j + 1] >= 0 ? "+" : "-");
-                }
-                Console.WriteLine("= {0, 3}", values[i]);
-            }
-        }
-
+        
         /// <summary>
         /// Метод Крамера
         /// </summary>
-        public void Kramer()
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector Kramer(Matrix data, Vector values)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
 
-            if (data.CalculateDeterminant() == 0) {
-                Console.WriteLine("Матрица является вырожденной, метод Крамера не подходит для решения этого СЛАУ" + '\n');
-                return;
-            }
-
+            if (data.CalculateDeterminant() == 0) throw new ArgumentException("Матрица является вырожденной");
+            
             Vector x = new Vector(values.Count);
 
             for (int i = 0; i < values.Count; i++)
                 x[i] = data.InsertColumn(values, i).CalculateDeterminant() / data.CalculateDeterminant();
 
-            x.Print();
+            return x;
         }
 
         /// <summary>
         /// Методом обратной матрицы
         /// </summary>
-        public void InvertibleMatrix()
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector InvertibleMatrix(Matrix data, Vector values)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
-            (data.CreateInvertibleMatrix() * values).Print();
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
+            return data.CreateInvertibleMatrix() * values;
         }
 
         /// <summary>
         /// Метод Гаусса
         /// </summary>
-        public void Gauss()
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector Gauss(Matrix data, Vector values)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
 
             Matrix gaussMatrix = data.Copy();
             Vector gaussVector = values.Copy();
@@ -108,66 +84,89 @@ namespace Practice.Class
                 if (gaussMatrix[i, i] == 0 && gaussVector[i] != 0)
                 {
                     Console.WriteLine("Решений нет");
-                    return;
                 }
 
                 x[i] /= gaussMatrix[i, i];
             }
 
-            x.Print();
+            return x;
         }
 
         /// <summary>
         /// Метод прогонки
         /// </summary>
-        public void TridiagonalMatrixAlgorithm()
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector TridiagonalMatrixAlgorithm(Matrix data, Vector values)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
-            if (!data.IsTridiagonal) { Console.WriteLine("Матрица не трехдиагональная" + '\n'); return; }
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
+            if (!data.IsTridiagonal) throw new ArgumentException("Матрица не трехдиагональная");
 
-            var a = new double[data.Rows - 1];  // нижняя диагональ
-            var b = new double[data.Rows]; // средняя диагональ
-            var c = new double[data.Rows - 1]; // верхняя диагональ
-            var y = new double[data.Rows]; // вектор значений
+            var n = data.Rows;
+            var a = new double[n - 1];  // нижняя диагональ
+            var b = new double[n]; // средняя диагональ
+            var c = new double[n - 1]; // верхняя диагональ
+            var y = new double[n]; // вектор значений
 
-            b[data.Rows - 1] = data[data.Rows - 1, data.Rows - 1];
-            y[data.Rows - 1] = values[data.Rows - 1];
+            b[n - 1] = data[n - 1, n - 1];
 
-            for (int i = 0; i < data.Rows - 1; i++)
+            y[n - 1] = values[n - 1];
+
+            for (int i = 0; i < n - 1; i++)
             {
                 a[i] = data[i + 1, i];
                 b[i] = data[i, i];
                 c[i] = data[i, i + 1];
                 y[i] = values[i];
             }
-            
-            var alpha = new double[data.Rows];
-            var beta = new double[data.Rows];
+
+            return TridiagonalMatrixAlgorithm(a, b, c, y);
+        }
+
+        /// <summary>
+        /// Метод прогонки
+        /// </summary>
+        /// <param name="a">Нижняя диагональ</param>
+        /// <param name="b">Средняя диагональ</param>
+        /// <param name="c">Верхняя диагональ</param>
+        /// <param name="y">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector TridiagonalMatrixAlgorithm(double[] a, double[] b, double[] c, double[] y)
+        {
+            var n = y.Length;
+            var alpha = new double[n];
+            var beta = new double[n];
 
             alpha[0] = c[0] / b[0];
             beta[0] = y[0] / b[0];
 
-            for (int i = 1; i < data.Rows - 1; i++)
+            for (int i = 1; i < n - 1; i++)
             {
                 alpha[i] = c[i] / (b[i] - a[i - 1] * alpha[i - 1]);
                 beta[i] = (y[i] - a[i - 1] * beta[i - 1]) / (b[i] - a[i - 1] * alpha[i - 1]);
             }
-            
-            Vector x = new Vector(data.Rows);
-            x[data.Rows - 1] = beta[data.Rows - 1];
-            for (int i = data.Rows - 1; i > 0; i--)
+
+            beta[n - 1] = (y[n - 1] - a[n - 2] * beta[n - 2]) / (b[n - 1] - a[n - 2] * alpha[n - 2]);
+
+            Vector x = new Vector(n);
+            x[n - 1] = beta[n - 1];
+            for (int i = n - 1; i > 0; i--)
                 x[i - 1] = beta[i - 1] - alpha[i - 1] * x[i];
 
-            x.Print();
+            return x;
         }
 
         /// <summary>
         /// Метод квадратных корней
         /// </summary>
-        public void CholeskyDecomposition()
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector CholeskyDecomposition(Matrix data, Vector values)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
-            if (!data.IsSymmetrical) { Console.WriteLine("Матрица не симметричная" + '\n'); return; }
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
+            if (!data.IsSymmetrical) throw new ArgumentException("Матрица не симметричная");
 
             Matrix u = new Matrix(data.Rows, data.Columns);
             Vector x = new Vector(data.Rows);
@@ -220,21 +219,24 @@ namespace Practice.Class
                 x[i] = (y[i] - temp) / u[i, i];
             }
 
-            x.Print();
+            return x;
         }
 
         /// <summary>
         /// Метод простых итераций
         /// </summary>
-        /// <param name="eps">Эпсилон</param>
-        public void Itera(double eps)
+        /// <param name="eps">Погрешность</param>
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector Itera(Matrix data, Vector values, double eps)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
 
             Matrix initMatrix = data.Copy();
             Vector initValue = values.Copy();
-            if (!initMatrix.CheckIterationAlgorithm(initValue))
-                { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
+            if (!initMatrix.CheckIterationAlgorithm(initValue)) 
+                throw new ArgumentException("Метод не подходит для решения данной системы");
 
             Matrix alpha = initMatrix.Copy();
             Vector x = new Vector(initMatrix.Rows);
@@ -251,7 +253,7 @@ namespace Practice.Class
             }
 
             if (alpha.ColumnNorm >= 1 || alpha.RowNorm >= 1)
-                { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
+                throw new ArgumentException("Метод не подходит для решения данной системы");
 
             Vector beta = x0.Copy();
             do
@@ -262,22 +264,24 @@ namespace Practice.Class
                 count++;
             } while ((x0 - x).Norm >= eps);
 
-            Console.WriteLine("Кол-во итераций: {0}", count);
-            x.Print();
+            return x;
         }
 
         /// <summary>
         /// Метод Зейделя
         /// </summary>
-        /// <param name="eps">Эпсилон</param>
-        public void Seidel(double eps)
+        /// <param name="eps">Погрешность</param>
+        /// <param name="data">Матрица значений</param>
+        /// <param name="values">Вектор значений</param>
+        /// <returns>Вектор решений</returns>
+        public static Vector Seidel(Matrix data, Vector values, double eps)
         {
-            if (!data.IsSquare) { Console.WriteLine("Матрица не квадратная" + '\n'); return; }
+            if (!data.IsSquare) throw new ArgumentException("Матрица не квадратная");
 
             Matrix initMatrix = data.Copy();
             Vector initValue = values.Copy();
             if (!initMatrix.CheckIterationAlgorithm(initValue))
-                { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); ; return; }
+                throw new ArgumentException("Метод не подходит для решения данной системы");
 
             Matrix L = new Matrix(initMatrix.Rows, initMatrix.Columns);
             Matrix U = new Matrix(data.Rows, data.Columns);
@@ -299,7 +303,7 @@ namespace Practice.Class
             }
 
             if (alpha.ColumnNorm >= 1 || alpha.RowNorm >= 1)
-                { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
+                throw new ArgumentException("Метод не подходит для решения данной системы");
 
             for (int i = 0; i < initMatrix.Rows; i++)
             {
@@ -314,7 +318,7 @@ namespace Practice.Class
 
             if (((E - L).CreateInvertibleMatrix() * U).ColumnNorm >= 1 ||
                     ((E - L).CreateInvertibleMatrix() * U).RowNorm >= 1)
-                        { Console.WriteLine("Метод неподходит для решение данной системы" + '\n'); return; }
+                throw new ArgumentException("Метод не подходит для решения данной системы");
 
             Vector beta = x0.Copy();
             do
@@ -325,8 +329,8 @@ namespace Practice.Class
                 count++;
             } while ((x0 - x).Norm >= eps);
 
-            Console.WriteLine("Кол-во итераций: {0}", count);
-            x.Print();
+            return x;
         }
     }
 }
+

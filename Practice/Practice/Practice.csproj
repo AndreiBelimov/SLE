@@ -45,8 +45,8 @@
   <ItemGroup>
     <Compile Include="Class\Constants.cs" />
     <Compile Include="Class\Permutations.cs" />
-    <Compile Include="Class\SLE.cs" />
     <Compile Include="Class\Matrix.cs" />
+    <Compile Include="Class\SLESolver.cs" />
     <Compile Include="Class\Vector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

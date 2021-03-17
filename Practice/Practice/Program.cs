@@ -21,11 +21,7 @@ namespace Practice
 
             var values = new double[] { 8, 10, 3, -2 };
 
-            SLE system = new SLE(new Matrix(matrix), new Vector(values));
-            Console.WriteLine();
-
-            Console.WriteLine("Метод прогонки");
-            system.TridiagonalMatrixAlgorithm();
+            Console.WriteLine(SLESolver.TridiagonalMatrixAlgorithm(new Matrix(matrix), new Vector(values)));
         }
 
         static void Main(string[] args)
