@@ -44,6 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class\Constants.cs" />
+    <Compile Include="Class\DifferentialEquationSolver.cs" />
+    <Compile Include="Class\IntergralSolver.cs" />
     <Compile Include="Class\Permutations.cs" />
     <Compile Include="Class\Matrix.cs" />
     <Compile Include="Class\SLESolver.cs" />
